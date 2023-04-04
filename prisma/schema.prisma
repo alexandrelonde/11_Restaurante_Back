@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== Tabela User
+model User {
+  id        Int      @id @default(autoincrement()) // chave primária, auto incrementada
+  email     String   @unique
+  name      String
+  lastName  String
+  admin     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  posts     Post[] // Relação com a tabela Post
+
+  @@map("user") // Mapeamento da tabela para o banco - nome "user"
+}
+
+// ========== Tabela Post
+model Post {
+  id        Int      @id @default(autoincrement())
+  published Boolean  @default(false)
+  title     String   @db.VarChar(255) // limitar a quantidade de caracteres na string
+  content   String? // colocamos uma ? quando o campo não é obrigatório
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  author   User? @relation(fields: [authorId], references: [id]) // Criando a relação com a tabela User
+  authorId Int? // Chave estrangeira
+
+  @@map("post") // Mapeamento da tabela passando para o banco com o nome de post
+}
+
+// ========== Tabela Restaurante
+model Restaurante {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  nome     String
+  endereco String
+  nota     Int
+  pratos   Prato[] // Relação com a tabela Prato
+
+  @@map("restaurante")
+}
+
+// ========== Tabela Prato
+model Prato {
+  id        Int    @id @default(autoincrement())
+  nome      String
+  descricao String
+  preco     Float // Como tratar float na API?
+
+  restaurante   Restaurante? @relation(fields: [restauranteId], references: [id]) // Criando a relação com a tabela Restaurante
+  restauranteId Int? // Chave estrangeira
+
+  @@map("prato") // Mapeamento da tabela passando para o banco com o nome de prato
+}
